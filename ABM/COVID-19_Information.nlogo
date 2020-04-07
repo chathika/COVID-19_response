@@ -32,6 +32,7 @@ to go
   ]
   expose
   show-symptoms
+  tick
 end
 
 to expose
@@ -49,8 +50,8 @@ to expose
 end
 
 to show-symptoms
-  ask people with [not covid-19-symptomatic] [
-    if ticks - tick-infected = incubation-period [
+  ask people with [not covid-19-symptomatic and sars-cov-2] [
+    if ticks - tick-infected >= incubation-period [
       set covid-19-symptomatic true
       set color red
     ]
