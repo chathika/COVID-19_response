@@ -12,7 +12,7 @@ people-own [
 
 to setup
   clear-all
-  create-people 100[
+  create-people density * count patches[
     set xcor random-xcor
     set ycor random-ycor
     set shape "person"
@@ -110,10 +110,10 @@ NIL
 1
 
 BUTTON
-61
-92
-124
-125
+126
+42
+189
+75
 NIL
 go
 T
@@ -127,25 +127,25 @@ NIL
 1
 
 SLIDER
-33
-186
-205
-219
+26
+128
+198
+161
 infection-radius
 infection-radius
 0
 10
-10.0
+4.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-29
-145
-201
-178
+25
+87
+197
+120
 exposure-probability
 exposure-probability
 0
@@ -157,10 +157,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-76
-330
-164
-363
+75
+167
+163
+200
 NIL
 infect-one
 NIL
@@ -172,6 +172,40 @@ NIL
 NIL
 NIL
 1
+
+PLOT
+655
+52
+995
+282
+Infected or Exposed
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"Infected" 1.0 0 -1184463 true "" "plot count people with [sars-cov-2]"
+"Symptomatic" 1.0 0 -2674135 true "" "plot count people with [covid-19-symptomatic]"
+
+SLIDER
+25
+215
+197
+248
+density
+density
+0
+1
+0.7
+0.1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
