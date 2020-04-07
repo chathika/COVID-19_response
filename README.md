@@ -2,4 +2,4 @@
 
 - root <br/>
 -- ABM (Agent-based models of COVID-19 and related (mis)information spread)<br/>
--- DataAnalytics (scripts analyzing data sets on COVID-19
+-- DataAnalytics (scripts analyzing data sets on COVID-19)
