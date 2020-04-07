@@ -4,18 +4,23 @@ breed [people person]
 
 people-own [
  sars-cov-2
+ tick-infected
  incubation-period
- covid-2-symptomatic
+ covid-19-symptomatic
   physical-neighbors
 ]
 
 to setup
   clear-all
   create-people 100[
-   set xcor random-xcor
-   set ycor random-ycor
-   set shape "person"
-   set color green
+    set xcor random-xcor
+    set ycor random-ycor
+    set shape "person"
+    set color green
+    set covid-19-symptomatic false
+    set incubation-period -1
+    set tick-infected -1
+    set sars-cov-2 false
   ]
   reset-ticks
 end
@@ -37,13 +42,26 @@ to expose
         set sars-cov-2 true
         set color yellow
         set incubation-period random 14
+        set tick-infected ticks
       ]
     ]
   ]
 end
 
 to show-symptoms
+  ask people with [not covid-19-symptomatic] [
+    if ticks - tick-infected = incubation-period [
+      set covid-19-symptomatic true
+      set color red
+    ]
+  ]
+end
 
+to infect-one
+  ask one-of people [
+   set sars-cov-2 true
+   set color yellow
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -136,6 +154,23 @@ exposure-probability
 1
 NIL
 HORIZONTAL
+
+BUTTON
+76
+330
+164
+363
+NIL
+infect-one
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
