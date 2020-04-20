@@ -1,7 +1,10 @@
 ;; Copyright Chathika Gunaratne <chathikagunaratne@gmail.com>
+extensions [table]
 
 breed [people person]
-
+globals [
+ emmigrated-people-info
+]
 people-own [
  sars-cov-2
  tick-infected
@@ -10,28 +13,34 @@ people-own [
   physical-neighbors
 ]
 
+
 to setup
   clear-all
-  create-people density * count patches[
+  ask patches [set pcolor white]
+  create-people init-num-people[
     set xcor random-xcor
     set ycor random-ycor
     set shape "person"
-    set color green
+    set color gray - 2
     set covid-19-symptomatic false
     set incubation-period -1
     set tick-infected -1
     set sars-cov-2 false
+    set physical-neighbors no-turtles
   ]
+  set emmigrated-people-info (list)
   reset-ticks
 end
 
 to go
+  if ticks = 20000 [stop]
   ask people [
   set heading random 360
   forward 1
   ]
   expose
   show-symptoms
+  avoid-symptomatics
   tick
 end
 
@@ -41,7 +50,7 @@ to expose
     ask physical-neighbors [
       if random-float 1 <= exposure-probability [
         set sars-cov-2 true
-        set color yellow
+        set color yellow - 2
         set incubation-period random 14
         set tick-infected ticks
       ]
@@ -53,15 +62,73 @@ to show-symptoms
   ask people with [not covid-19-symptomatic and sars-cov-2] [
     if ticks - tick-infected >= incubation-period [
       set covid-19-symptomatic true
-      set color red
+      set color red - 2
     ]
   ]
 end
 
 to infect-one
-  ask one-of people [
-   set sars-cov-2 true
-   set color yellow
+  if any? people with [not sars-cov-2] [
+    ask one-of people [
+      set sars-cov-2 true
+      set color yellow - 2
+    ]
+  ]
+end
+
+to avoid-symptomatics
+  ask people with [not covid-19-symptomatic][
+    if any? physical-neighbors with [covid-19-symptomatic][
+      let new-x 0
+      let new-y 0
+      foreach (sort (physical-neighbors with [covid-19-symptomatic]))[ n ->
+        ;infection-radius - distance n
+        set new-x xcor + (([xcor] of n) - xcor)
+        set new-y ycor + (([ycor] of n) - ycor)
+      ]
+      facexy new-x new-y
+      forward 1
+    ]
+  ]
+end
+
+to emmigrate-person [emmigrant]
+  let emmigrated-person-info table:make
+  ask emmigrant [
+    table:put emmigrated-person-info "sars-cov-2" sars-cov-2
+    table:put emmigrated-person-info "tick-infected" tick-infected
+    table:put emmigrated-person-info "incubation-period" incubation-period
+    table:put emmigrated-person-info "covid-19-symptomatic" covid-19-symptomatic
+    die
+  ]
+  set emmigrated-people-info lput emmigrated-person-info emmigrated-people-info
+end
+
+to immigrate-person [infected]
+  create-people 1 [
+    set xcor random-xcor
+    set ycor random-ycor
+    set shape "person"
+    set color gray - 2
+    set covid-19-symptomatic false
+    set incubation-period -1
+    set tick-infected -1
+    set sars-cov-2 infected
+    set physical-neighbors no-turtles
+  ]
+end
+
+;intensity is between 0 and 1
+to isolate-at-intensity [intensity]
+  let new-num-people (init-num-people - (round intensity * init-num-people))
+  ifelse new-num-people < count people [
+    repeat ((count people) - new-num-people) [
+      emmigrate-person one-of people
+    ]
+  ][
+   repeat (new-num-people - (count people)) [
+      immigrate-person (ifelse-value (random-float 1 < 0.5) [true][false])
+    ]
   ]
 end
 @#$#@#$#@
@@ -135,7 +202,7 @@ infection-radius
 infection-radius
 0
 10
-4.0
+2.0
 1
 1
 NIL
@@ -150,7 +217,7 @@ exposure-probability
 exposure-probability
 0
 1
-0.05
+0.08
 0.01
 1
 NIL
@@ -189,7 +256,7 @@ true
 true
 "" ""
 PENS
-"Infected" 1.0 0 -1184463 true "" "plot count people with [sars-cov-2]"
+"Infected" 1.0 0 -13345367 true "" "plot count people with [sars-cov-2]"
 "Symptomatic" 1.0 0 -2674135 true "" "plot count people with [covid-19-symptomatic]"
 
 SLIDER
@@ -197,15 +264,26 @@ SLIDER
 215
 197
 248
-density
-density
+init-num-people
+init-num-people
 0
 1
-0.7
+0.8
 0.1
 1
 NIL
 HORIZONTAL
+
+MONITOR
+789
+325
+874
+370
+NIL
+count people
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
