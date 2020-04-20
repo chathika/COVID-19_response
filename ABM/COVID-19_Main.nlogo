@@ -31,8 +31,11 @@ to setup
   set poi_movement_info table:make
   set movement-data but-first csv:from-file (word Region "/SafeGraph_POI_Visit_Info_" Region ".csv")
 
+  print "Init POIs"
   init-pois
+  print "Load Movement Data"
   load-movement-data
+  print "Init Child Models"
   init-child-models
 
   reset-ticks
@@ -45,7 +48,10 @@ to init-region-acronyms
 end
 
 to init-pois
+  let i 4
   foreach gis:feature-list-of gis-dataset-safegraph-poi [ poi ->
+    if i = 0 [ stop ]
+    set i i - 1
     let location gis:location-of first first (gis:vertex-lists-of poi)
     if not empty? location [
       let new-turtle nobody
@@ -72,7 +78,8 @@ to load-movement-data
         set visits-by-tick lput (item 5 row) visits-by-tick
       ]
     ]
-    [print (word "poi " (item 2 row) " not found")]
+    [;print (word "poi " (item 2 row) " not found")
+    ]
   ]
 end
 
@@ -95,10 +102,11 @@ to init-child-models
   ]
 end
 to go
+  if ticks > 100 [stop]
   ask turtles [
     (ls:ask local-model-id [ [t i] ->
       if ticks = t [
-        isolate-at-intensity
+        isolate-at-intensity i
       ]
       go
     ] tick-to-begin-isolation isolate-at-intensity)
@@ -106,6 +114,7 @@ to go
   ]
   show mean [ count people with [covid-19-symptomatic]] ls:of ls:models
   show mean [current-economic-performance] of turtles
+  tick
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -203,7 +212,7 @@ tick-to-begin-isolation
 tick-to-begin-isolation
 0
 20
-5.0
+20.0
 1
 1
 NIL
@@ -238,12 +247,12 @@ NIL
 0.0
 10.0
 0.0
-10.0
+1.0
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot count turtles"
+"default" 1.0 0 -16777216 true "" "plot mean [current-economic-performance] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
